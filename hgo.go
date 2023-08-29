@@ -2,9 +2,9 @@ package hgo
 
 import (
 	"github.com/spf13/viper"
-	"hgo/core/hgin"
-	"hgo/core/hmysql"
-	"hgo/core/hredis"
+	"github.com/ukinhappy/hgo/core/hgin"
+	"github.com/ukinhappy/hgo/core/hmysql"
+	"github.com/ukinhappy/hgo/core/hredis"
 	"log"
 	"os"
 	"os/signal"
