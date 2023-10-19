@@ -13,25 +13,37 @@ import (
 )
 
 type Hgo struct {
-	configPath          string
-	Http                *hgin.Http
-	Redis               map[string]hredis.Redis
-	Mysql               map[string]hmysql.Mysql
-	gracefulExitTimeout time.Duration
+	cfg   *Config
+	Http  *hgin.Http
+	Redis map[string]hredis.Redis
+	Mysql map[string]hmysql.Mysql
 }
 
 func New() *Hgo {
 	return &Hgo{
-		configPath:          "config.toml",
-		Http:                nil,
-		Redis:               make(map[string]hredis.Redis),
-		Mysql:               make(map[string]hmysql.Mysql),
-		gracefulExitTimeout: time.Second * 10,
+		cfg:   &DefaultCfg,
+		Http:  nil,
+		Redis: make(map[string]hredis.Redis),
+		Mysql: make(map[string]hmysql.Mysql),
 	}
 }
 
-func (h *Hgo) Init() {
-	viper.SetConfigFile(h.configPath)
+func (h *Hgo) Init(opts ...Option) {
+
+	for _, opt := range opts {
+		opt(h.cfg)
+	}
+
+	h.InitWithConfig(h.cfg)
+}
+
+func (h *Hgo) InitWithConfig(cfg *Config, opts ...Option) {
+	h.cfg = cfg
+	for _, opt := range opts {
+		opt(h.cfg)
+	}
+
+	viper.SetConfigFile(cfg.configPath)
 	viper.SetConfigType("toml")
 
 	// 读取配置文件
@@ -75,6 +87,6 @@ func (h *Hgo) gracefulExit() {
 	sig := <-signalChan
 	log.Printf("catch signal, %+v", sig)
 
-	time.Sleep(h.gracefulExitTimeout)
+	time.Sleep(h.cfg.gracefulExitTimeout)
 	log.Printf("server exiting")
 }
